@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Registration</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="registration.css">
+</head>
+<body>
+    <a href="homepage.html"> <button class="home-btn"> Home </button></a>
+    <div class="container mt-5">
+        <div class="title-container">
+            <img src="images/student.jpg" alt="Student-Icon" class="title-icon">
+            <h2>Students Registration</h2>
+        </div>
+        <form action="register_student.php" method="post">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <div class="form-group">
+                <label for="dob">Date of Birth:</label>
+                <input type="date" class="form-control" id="dob" name="dob" required>
+            </div>
+            <div class="form-group">
+                <label for="date_of_admission">Date of Admission:</label>
+                <input type="date" class="form-control" id="date_of_admission" name="date_of_admission" required>
+            </div>
+            <div class="form-group">
+                <label for="address">Address:</label>
+                <textarea class="form-control" id="address" name="address" required></textarea>
+            </div>
+            <button type="submit" class="reg-btn">Register</button>
+        </form>
+    </div>
+</body>
+<script>
+    function validateDateInput(inputId) {
+        var input = document.getElementById(inputId);
+        var dateValue = input.value.trim();
+        
+        // Validate format YYYY-MM-DD
+        var dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!dateRegex.test(dateValue)) {
+            alert("Date format should be YYYY-MM-DD");
+            return false;
+        }
+
+        // Check year part
+        var year = dateValue.substring(0, 4);
+        if (year.length !== 4 || isNaN(year)) {
+            alert("Year should be 4 digits");
+            return false;
+        }
+
+        return true;
+    }
+
+    function validateForm() {
+        if (!validateDateInput('dob')) {
+            return false;
+        }
+
+        if (!validateDateInput('date_of_admission')) {
+            return false;
+        }
+
+        return true;
+    }
+</script>
+</html>
