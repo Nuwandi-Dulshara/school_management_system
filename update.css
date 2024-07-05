@@ -1,0 +1,80 @@
+body{
+    background: linear-gradient(to bottom,#7FDA8E 61%,#3E5B33 100%);
+}
+
+.container {
+    max-width: 800px;
+    margin: 50px auto;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 5px;
+    box-shadow: rgba(0, 0, 0, 1) 0px 2px 4px, rgba(0, 0, 0, 1) 0px 7px 13px -3px, rgba(0, 0, 0, 1) 0px -3px 0px inset;
+}
+
+.title-container {
+    display: flex;
+    align-items: center;
+    margin-top: 30px;
+    background-color: #145A23;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+    
+}
+
+.title-container h2 {
+    color: white;
+    margin: 0;
+    margin-left: 5px;
+    
+}
+
+.title-icon {
+    width: 50px;
+    height: 50px;
+    margin-left: 180px;
+    border-radius: 40px;
+}
+
+.form-group {
+    margin-top: 20px;
+}
+
+label {
+    font-weight: bold;
+}
+
+.form-control{
+    background-color: #ffffff;
+    color: rgb(0, 0, 0);
+    border: black 1px solid;
+}
+
+textarea.form-control {
+    height: 100px; 
+}
+
+.up-btn{
+    margin-top: 20px;
+    background-color: black;
+    color: white;
+    padding: 8px 30px;
+    font-size: 20px;
+    font-weight: bold;
+    border-radius: 20px;
+}
+
+.back-btn{
+    margin-top: 20px;
+    background-color: black;
+    color: white;
+    padding: 8px 30px;
+    font-size: 20px;
+    font-weight: bold;
+    border-radius: 20px;
+    margin-left: 20px;
+
+}
+
+
+
