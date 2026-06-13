@@ -1,18 +1,13 @@
-@extends('layouts.app')
+@extends('layouts.super_admin', ['pageTitle' => 'Dashboard'])
 
-@section('content')
-<div class="container mt-5">
-    <h1>Super Admin Dashboard</h1>
-    
-    <div class="mt-4">
-        <p>Welcome, <strong>{{ Auth::user()->first_name }} {{ Auth::user()->last_name }}</strong>!</p>
+@section('super_admin_content')
+<div class="page-heading">
+    <div>
+        <h1>Super Admin Dashboard</h1>
+        <p>Manage system users and their access levels from the User Management module.</p>
     </div>
-
-    <div class="mt-4">
-        <form method="POST" action="{{ route('logout') }}" style="display: inline;">
-            @csrf
-            <button type="submit" class="btn btn-danger">Logout</button>
-        </form>
-    </div>
+    <a href="{{ route('super_admin.users.create') }}" class="btn btn-academic">
+        <i class="bi bi-person-plus-fill me-2"></i>Add User
+    </a>
 </div>
 @endsection
