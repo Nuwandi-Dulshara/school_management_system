@@ -7,12 +7,14 @@
     .dashboard-wrapper { display: flex; min-height: 100vh; }
     .sidebar {
         width: 260px; background: linear-gradient(135deg, var(--navy-secondary) 0%, #11224e 100%);
-        color: white; padding: 2rem 0 7rem; position: fixed; inset: 0 auto 0 0;
-        overflow-y: auto; box-shadow: 2px 0 10px rgba(0, 0, 0, .1); z-index: 1000;
+        height: 100vh; color: white; padding: 2rem 0 0; position: fixed; inset: 0 auto 0 0;
+        display: flex; flex-direction: column; overflow: hidden;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, .1); z-index: 1000;
     }
-    .sidebar-brand { padding: 0 1.5rem 2rem; border-bottom: 1px solid rgba(255,255,255,.1); margin-bottom: 1.25rem; text-align: center; }
+    .sidebar-brand { flex: 0 0 auto; padding: 0 1.5rem 2rem; border-bottom: 1px solid rgba(255,255,255,.1); margin-bottom: 1.25rem; text-align: center; }
     .sidebar-brand i { font-size: 2.5rem; color: var(--amber-accent); display: block; margin-bottom: .5rem; }
     .sidebar-brand h4 { font-size: 1.3rem; font-weight: 700; margin: 0; color: white; }
+    .sidebar nav { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding-bottom: 1rem; }
     .sidebar-menu { list-style: none; padding: 0; margin: 0; }
     .sidebar-menu-link {
         display: flex; align-items: center; padding: .875rem 1.5rem; color: rgba(255,255,255,.72);
@@ -39,7 +41,7 @@
     .sidebar-menu-group.is-open .sidebar-submenu { display: block; }
     .sidebar-submenu .sidebar-menu-link { padding-left: 3.2rem; font-size: .92rem; }
     .sidebar-submenu .sidebar-menu-link i { font-size: .55rem; }
-    .sidebar-footer { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5rem; border-top: 1px solid rgba(255,255,255,.1); background: rgba(0,0,0,.2); }
+    .sidebar-footer { flex: 0 0 auto; padding: 1.5rem; border-top: 1px solid rgba(255,255,255,.1); background: rgba(0,0,0,.2); }
     .sidebar-footer .btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: .5rem; }
     .main-content { margin-left: 260px; flex: 1; padding: 2rem; min-width: 0; min-height: 100vh; }
     .topbar {
@@ -65,6 +67,8 @@
     .status-inactive { color: #991b1b; background: #fee2e2; }
     .status-transferred { color: #92400e; background: #fef3c7; }
     .status-graduated { color: #5b21b6; background: #ede9fe; }
+    .status-assigned { color: #166534; background: #dcfce7; }
+    .status-removed { color: #991b1b; background: #fee2e2; }
     .role-badge { color: var(--navy-secondary); background: #e8edfb; border-radius: 999px; padding: .3rem .65rem; font-size: .78rem; font-weight: 600; }
     .empty-state { text-align: center; padding: 4rem 1rem; color: #6b7280; }
     .empty-state i { font-size: 3rem; color: #cbd5e1; display: block; margin-bottom: 1rem; }
@@ -75,9 +79,10 @@
     .role-icon { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: #e8edfb; color: var(--navy-secondary); font-size: 1.4rem; }
     @media (max-width: 768px) {
         .dashboard-wrapper { flex-direction: column; }
-        .sidebar { width: 100%; height: auto; position: relative; padding: 1rem 0; }
+        .sidebar { width: 100%; height: auto; position: relative; padding: 1rem 0 0; overflow: visible; }
         .sidebar-brand { padding-bottom: 1rem; margin-bottom: .5rem; }
-        .sidebar-footer { position: static; margin-top: 1rem; }
+        .sidebar nav { overflow: visible; padding-bottom: 0; }
+        .sidebar-footer { margin-top: 1rem; }
         .main-content { margin-left: 0; padding: 1rem; }
         .topbar { margin: -1rem -1rem 1rem; padding: 1rem; }
         .content-area { padding: 1.25rem; }
@@ -99,6 +104,10 @@
             $userMenuActive = request()->routeIs('super_admin.users.*', 'super_admin.roles.*');
             $studentMenuActive = request()->routeIs('super_admin.students.*');
             $teacherMenuActive = request()->routeIs('super_admin.teachers.*');
+            $classMenuActive = request()->routeIs('super_admin.classes.*', 'super_admin.sections.*');
+            $subjectMenuActive = request()->routeIs('super_admin.subjects.*');
+            $assignmentMenuActive = request()->routeIs('super_admin.student_assignments.*');
+            $teacherAssignmentMenuActive = request()->routeIs('super_admin.teacher_assignments.*');
         @endphp
 
         <nav aria-label="Super Admin navigation">
@@ -191,6 +200,139 @@
                     <li>
                         <a href="{{ route('super_admin.teachers.index', ['manage' => 'subjects']) }}" class="sidebar-menu-link {{ request()->routeIs('super_admin.teachers.subjects*') || request('manage') === 'subjects' ? 'active' : '' }}">
                             <i class="bi bi-circle-fill"></i><span>Assigned Subjects</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-menu-group {{ $classMenuActive ? 'is-open' : '' }}" data-sidebar-group>
+                <button type="button" class="sidebar-menu-link sidebar-menu-toggle {{ $classMenuActive ? 'active' : '' }}"
+                    aria-expanded="{{ $classMenuActive ? 'true' : 'false' }}" aria-controls="class-section-management-menu"
+                    data-sidebar-toggle>
+                    <i class="bi bi-diagram-3-fill"></i>
+                    <span>Class &amp; Section Management</span>
+                    <i class="bi bi-chevron-down sidebar-menu-arrow" aria-hidden="true"></i>
+                </button>
+                <ul class="sidebar-menu sidebar-submenu" id="class-section-management-menu">
+                    <li>
+                        <a href="{{ route('super_admin.classes.index') }}" class="sidebar-menu-link {{ request()->routeIs('super_admin.classes.index', 'super_admin.classes.show', 'super_admin.classes.edit') && !request('manage') ? 'active' : '' }}">
+                            <i class="bi bi-circle-fill"></i><span>Class List</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('super_admin.classes.create') }}" class="sidebar-menu-link {{ request()->routeIs('super_admin.classes.create') ? 'active' : '' }}">
+                            <i class="bi bi-circle-fill"></i><span>Add Class</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('super_admin.sections.index') }}" class="sidebar-menu-link {{ request()->routeIs('super_admin.sections.index', 'super_admin.sections.edit') ? 'active' : '' }}">
+                            <i class="bi bi-circle-fill"></i><span>Section List</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('super_admin.sections.create') }}" class="sidebar-menu-link {{ request()->routeIs('super_admin.sections.create') ? 'active' : '' }}">
+                            <i class="bi bi-circle-fill"></i><span>Add Section</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('super_admin.classes.index', ['manage' => 'students']) }}" class="sidebar-menu-link {{ request()->routeIs('super_admin.classes.students') || request('manage') === 'students' ? 'active' : '' }}">
+                            <i class="bi bi-circle-fill"></i><span>Class Student List</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-menu-group {{ $subjectMenuActive ? 'is-open' : '' }}" data-sidebar-group>
+                <button type="button" class="sidebar-menu-link sidebar-menu-toggle {{ $subjectMenuActive ? 'active' : '' }}"
+                    aria-expanded="{{ $subjectMenuActive ? 'true' : 'false' }}" aria-controls="subject-management-menu"
+                    data-sidebar-toggle>
+                    <i class="bi bi-journal-bookmark-fill"></i>
+                    <span>Subject Management</span>
+                    <i class="bi bi-chevron-down sidebar-menu-arrow" aria-hidden="true"></i>
+                </button>
+                <ul class="sidebar-menu sidebar-submenu" id="subject-management-menu">
+                    <li>
+                        <a href="{{ route('super_admin.subjects.index') }}" class="sidebar-menu-link {{ request()->routeIs('super_admin.subjects.index', 'super_admin.subjects.show') && !request('manage') ? 'active' : '' }}">
+                            <i class="bi bi-circle-fill"></i><span>Subject List</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('super_admin.subjects.create') }}" class="sidebar-menu-link {{ request()->routeIs('super_admin.subjects.create') ? 'active' : '' }}">
+                            <i class="bi bi-circle-fill"></i><span>Add Subject</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('super_admin.subjects.index', ['manage' => 'edit']) }}" class="sidebar-menu-link {{ request()->routeIs('super_admin.subjects.edit') || request('manage') === 'edit' ? 'active' : '' }}">
+                            <i class="bi bi-circle-fill"></i><span>Edit Subject</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('super_admin.subjects.classes') }}" class="sidebar-menu-link {{ request()->routeIs('super_admin.subjects.classes*') ? 'active' : '' }}">
+                            <i class="bi bi-circle-fill"></i><span>Class Subject List</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-menu-group {{ $assignmentMenuActive ? 'is-open' : '' }}" data-sidebar-group>
+                <button type="button" class="sidebar-menu-link sidebar-menu-toggle {{ $assignmentMenuActive ? 'active' : '' }}"
+                    aria-expanded="{{ $assignmentMenuActive ? 'true' : 'false' }}" aria-controls="student-class-assignment-menu"
+                    data-sidebar-toggle>
+                    <i class="bi bi-person-check-fill"></i>
+                    <span>Student-Class Assignment</span>
+                    <i class="bi bi-chevron-down sidebar-menu-arrow" aria-hidden="true"></i>
+                </button>
+                <ul class="sidebar-menu sidebar-submenu" id="student-class-assignment-menu">
+                    <li>
+                        <a href="{{ route('super_admin.student_assignments.create') }}" class="sidebar-menu-link {{ request()->routeIs('super_admin.student_assignments.create') ? 'active' : '' }}">
+                            <i class="bi bi-circle-fill"></i><span>Assign Students</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('super_admin.student_assignments.index') }}" class="sidebar-menu-link {{ request()->routeIs('super_admin.student_assignments.index', 'super_admin.student_assignments.show') ? 'active' : '' }}">
+                            <i class="bi bi-circle-fill"></i><span>Class-wise Student List</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('super_admin.student_assignments.transfers') }}" class="sidebar-menu-link {{ request()->routeIs('super_admin.student_assignments.transfers') ? 'active' : '' }}">
+                            <i class="bi bi-circle-fill"></i><span>Student Transfer</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('super_admin.student_assignments.academic_years') }}" class="sidebar-menu-link {{ request()->routeIs('super_admin.student_assignments.academic_years') ? 'active' : '' }}">
+                            <i class="bi bi-circle-fill"></i><span>Academic Year Assignment</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-menu-group {{ $teacherAssignmentMenuActive ? 'is-open' : '' }}" data-sidebar-group>
+                <button type="button" class="sidebar-menu-link sidebar-menu-toggle {{ $teacherAssignmentMenuActive ? 'active' : '' }}"
+                    aria-expanded="{{ $teacherAssignmentMenuActive ? 'true' : 'false' }}" aria-controls="teacher-subject-assignment-menu"
+                    data-sidebar-toggle>
+                    <i class="bi bi-person-workspace"></i>
+                    <span>Teacher-Subject Assignment</span>
+                    <i class="bi bi-chevron-down sidebar-menu-arrow" aria-hidden="true"></i>
+                </button>
+                <ul class="sidebar-menu sidebar-submenu" id="teacher-subject-assignment-menu">
+                    <li>
+                        <a href="{{ route('super_admin.teacher_assignments.create') }}" class="sidebar-menu-link {{ request()->routeIs('super_admin.teacher_assignments.create') ? 'active' : '' }}">
+                            <i class="bi bi-circle-fill"></i><span>Assign Teacher</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('super_admin.teacher_assignments.index') }}" class="sidebar-menu-link {{ request()->routeIs('super_admin.teacher_assignments.index', 'super_admin.teacher_assignments.show') ? 'active' : '' }}">
+                            <i class="bi bi-circle-fill"></i><span>Teacher Assignment List</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('super_admin.teacher_assignments.class_wise') }}" class="sidebar-menu-link {{ request()->routeIs('super_admin.teacher_assignments.class_wise') ? 'active' : '' }}">
+                            <i class="bi bi-circle-fill"></i><span>Class-wise Teacher List</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('super_admin.teacher_assignments.subject_wise') }}" class="sidebar-menu-link {{ request()->routeIs('super_admin.teacher_assignments.subject_wise') ? 'active' : '' }}">
+                            <i class="bi bi-circle-fill"></i><span>Subject-wise Teacher List</span>
                         </a>
                     </li>
                 </ul>

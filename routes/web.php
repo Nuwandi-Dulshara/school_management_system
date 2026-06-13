@@ -2,8 +2,12 @@
 
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\SuperAdmin\ClassSectionManagementController;
 use App\Http\Controllers\SuperAdmin\StudentManagementController;
+use App\Http\Controllers\SuperAdmin\StudentClassAssignmentController;
+use App\Http\Controllers\SuperAdmin\SubjectManagementController;
 use App\Http\Controllers\SuperAdmin\TeacherManagementController;
+use App\Http\Controllers\SuperAdmin\TeacherSubjectAssignmentController;
 use App\Http\Controllers\SuperAdmin\UserManagementController;
 use Illuminate\Support\Facades\Route;
 
@@ -68,6 +72,58 @@ Route::middleware(['auth', 'super_admin'])->prefix('dashboard/super-admin')->gro
     Route::put('/teachers/{teacher}/assigned-subjects/{subjectAssignment}', [TeacherManagementController::class, 'updateAssignedSubject'])->name('super_admin.teachers.subjects.update');
     Route::delete('/teachers/{teacher}/assigned-subjects/{subjectAssignment}', [TeacherManagementController::class, 'destroyAssignedSubject'])->name('super_admin.teachers.subjects.destroy');
     Route::get('/teachers/{teacher}', [TeacherManagementController::class, 'show'])->name('super_admin.teachers.show');
+
+    Route::get('/classes', [ClassSectionManagementController::class, 'index'])->name('super_admin.classes.index');
+    Route::get('/classes/create', [ClassSectionManagementController::class, 'create'])->name('super_admin.classes.create');
+    Route::post('/classes', [ClassSectionManagementController::class, 'store'])->name('super_admin.classes.store');
+    Route::get('/classes/sections', [ClassSectionManagementController::class, 'sections'])->name('super_admin.sections.index');
+    Route::get('/classes/sections/create', [ClassSectionManagementController::class, 'createSection'])->name('super_admin.sections.create');
+    Route::post('/classes/sections', [ClassSectionManagementController::class, 'storeSection'])->name('super_admin.sections.store');
+    Route::get('/classes/sections/{schoolSection}/edit', [ClassSectionManagementController::class, 'editSection'])->name('super_admin.sections.edit');
+    Route::put('/classes/sections/{schoolSection}', [ClassSectionManagementController::class, 'updateSection'])->name('super_admin.sections.update');
+    Route::patch('/classes/sections/{schoolSection}/status', [ClassSectionManagementController::class, 'toggleSectionStatus'])->name('super_admin.sections.status');
+    Route::delete('/classes/sections/{schoolSection}', [ClassSectionManagementController::class, 'destroySection'])->name('super_admin.sections.destroy');
+    Route::get('/classes/{schoolClass}/edit', [ClassSectionManagementController::class, 'edit'])->name('super_admin.classes.edit');
+    Route::put('/classes/{schoolClass}', [ClassSectionManagementController::class, 'update'])->name('super_admin.classes.update');
+    Route::patch('/classes/{schoolClass}/status', [ClassSectionManagementController::class, 'toggleStatus'])->name('super_admin.classes.status');
+    Route::delete('/classes/{schoolClass}', [ClassSectionManagementController::class, 'destroy'])->name('super_admin.classes.destroy');
+    Route::get('/classes/{schoolClass}/students', [ClassSectionManagementController::class, 'students'])->name('super_admin.classes.students');
+    Route::patch('/classes/{schoolClass}/students/{student}', [ClassSectionManagementController::class, 'assignStudent'])->name('super_admin.classes.students.assign');
+    Route::delete('/classes/{schoolClass}/students/{student}', [ClassSectionManagementController::class, 'removeStudent'])->name('super_admin.classes.students.remove');
+    Route::get('/classes/{schoolClass}', [ClassSectionManagementController::class, 'show'])->name('super_admin.classes.show');
+
+    Route::get('/subjects', [SubjectManagementController::class, 'index'])->name('super_admin.subjects.index');
+    Route::get('/subjects/create', [SubjectManagementController::class, 'create'])->name('super_admin.subjects.create');
+    Route::post('/subjects', [SubjectManagementController::class, 'store'])->name('super_admin.subjects.store');
+    Route::get('/subjects/class-subjects', [SubjectManagementController::class, 'classSubjects'])->name('super_admin.subjects.classes');
+    Route::post('/subjects/class-subjects', [SubjectManagementController::class, 'storeClassSubject'])->name('super_admin.subjects.classes.store');
+    Route::put('/subjects/class-subjects/{classSubject}', [SubjectManagementController::class, 'updateClassSubject'])->name('super_admin.subjects.classes.update');
+    Route::delete('/subjects/class-subjects/{classSubject}', [SubjectManagementController::class, 'destroyClassSubject'])->name('super_admin.subjects.classes.destroy');
+    Route::get('/subjects/{subject}/edit', [SubjectManagementController::class, 'edit'])->name('super_admin.subjects.edit');
+    Route::put('/subjects/{subject}', [SubjectManagementController::class, 'update'])->name('super_admin.subjects.update');
+    Route::patch('/subjects/{subject}/status', [SubjectManagementController::class, 'toggleStatus'])->name('super_admin.subjects.status');
+    Route::delete('/subjects/{subject}', [SubjectManagementController::class, 'destroy'])->name('super_admin.subjects.destroy');
+    Route::get('/subjects/{subject}', [SubjectManagementController::class, 'show'])->name('super_admin.subjects.show');
+
+    Route::get('/student-class-assignments', [StudentClassAssignmentController::class, 'index'])->name('super_admin.student_assignments.index');
+    Route::get('/student-class-assignments/assign', [StudentClassAssignmentController::class, 'create'])->name('super_admin.student_assignments.create');
+    Route::post('/student-class-assignments', [StudentClassAssignmentController::class, 'store'])->name('super_admin.student_assignments.store');
+    Route::get('/student-class-assignments/transfers', [StudentClassAssignmentController::class, 'transfers'])->name('super_admin.student_assignments.transfers');
+    Route::post('/student-class-assignments/{assignment}/transfer', [StudentClassAssignmentController::class, 'transfer'])->name('super_admin.student_assignments.transfer');
+    Route::get('/student-class-assignments/academic-years', [StudentClassAssignmentController::class, 'academicYears'])->name('super_admin.student_assignments.academic_years');
+    Route::put('/student-class-assignments/{assignment}', [StudentClassAssignmentController::class, 'update'])->name('super_admin.student_assignments.update');
+    Route::delete('/student-class-assignments/{assignment}', [StudentClassAssignmentController::class, 'destroy'])->name('super_admin.student_assignments.destroy');
+    Route::get('/student-class-assignments/{assignment}', [StudentClassAssignmentController::class, 'show'])->name('super_admin.student_assignments.show');
+
+    Route::get('/teacher-subject-assignments', [TeacherSubjectAssignmentController::class, 'index'])->name('super_admin.teacher_assignments.index');
+    Route::get('/teacher-subject-assignments/assign', [TeacherSubjectAssignmentController::class, 'create'])->name('super_admin.teacher_assignments.create');
+    Route::post('/teacher-subject-assignments', [TeacherSubjectAssignmentController::class, 'store'])->name('super_admin.teacher_assignments.store');
+    Route::get('/teacher-subject-assignments/class-wise', [TeacherSubjectAssignmentController::class, 'classWise'])->name('super_admin.teacher_assignments.class_wise');
+    Route::get('/teacher-subject-assignments/subject-wise', [TeacherSubjectAssignmentController::class, 'subjectWise'])->name('super_admin.teacher_assignments.subject_wise');
+    Route::put('/teacher-subject-assignments/{assignment}', [TeacherSubjectAssignmentController::class, 'update'])->name('super_admin.teacher_assignments.update');
+    Route::patch('/teacher-subject-assignments/{assignment}/status', [TeacherSubjectAssignmentController::class, 'toggleStatus'])->name('super_admin.teacher_assignments.status');
+    Route::delete('/teacher-subject-assignments/{assignment}', [TeacherSubjectAssignmentController::class, 'destroy'])->name('super_admin.teacher_assignments.destroy');
+    Route::get('/teacher-subject-assignments/{assignment}', [TeacherSubjectAssignmentController::class, 'show'])->name('super_admin.teacher_assignments.show');
 });
 
 Route::middleware('auth')->group(function () {

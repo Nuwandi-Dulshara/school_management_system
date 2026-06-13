@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
@@ -19,6 +20,8 @@ class Student extends Model
         'address',
         'contact_number',
         'email',
+        'school_class_id',
+        'school_section_id',
         'class',
         'section',
         'admission_date',
@@ -41,5 +44,20 @@ class Student extends Model
     public function documents(): HasMany
     {
         return $this->hasMany(StudentDocument::class);
+    }
+
+    public function schoolClass(): BelongsTo
+    {
+        return $this->belongsTo(SchoolClass::class);
+    }
+
+    public function schoolSection(): BelongsTo
+    {
+        return $this->belongsTo(SchoolSection::class);
+    }
+
+    public function classAssignments(): HasMany
+    {
+        return $this->hasMany(StudentClassAssignment::class);
     }
 }
