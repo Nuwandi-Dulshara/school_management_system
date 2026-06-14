@@ -4,6 +4,7 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\ExaminationController;
 use App\Http\Controllers\ExamScheduleController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\MarksResultController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\SuperAdmin\ClassSectionManagementController;
 use App\Http\Controllers\SuperAdmin\StudentClassAssignmentController;
@@ -173,3 +174,18 @@ Route::middleware('auth')->prefix('examinations')->name('examinations.')->group(
         Route::delete('/schedules/{examSchedule}', [ExamScheduleController::class, 'destroy'])->name('schedules.destroy');
     });
 });
+
+Route::middleware(['auth', 'marks_manager'])->prefix('marks')->name('marks.')->group(function () {
+    Route::get('/entry', [MarksResultController::class, 'entry'])->name('entry');
+    Route::post('/', [MarksResultController::class, 'store'])->name('store');
+    Route::get('/', [MarksResultController::class, 'index'])->name('index');
+    Route::get('/result-sheet', [MarksResultController::class, 'resultSheet'])->name('result_sheet');
+    Route::get('/class-report', [MarksResultController::class, 'classReport'])->name('class_report');
+    Route::get('/subject-report', [MarksResultController::class, 'subjectReport'])->name('subject_report');
+    Route::get('/{mark}/edit', [MarksResultController::class, 'edit'])->name('edit');
+    Route::put('/{mark}', [MarksResultController::class, 'update'])->name('update');
+    Route::delete('/{mark}', [MarksResultController::class, 'destroy'])->name('destroy');
+});
+
+Route::middleware('auth')->get('/student-results', [MarksResultController::class, 'studentResults'])
+    ->name('marks.student_results');

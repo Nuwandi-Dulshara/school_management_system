@@ -1,56 +1,89 @@
 @extends('layouts.app')
 
-@section('title', ($pageTitle ?? 'Super Admin') . ' - School Management System')
+@section('title', ($pageTitle ?? 'Dashboard') . ' - School Management System')
 
 @section('styles')
 <style>
     .dashboard-wrapper { display: flex; min-height: 100vh; }
     .sidebar {
-        width: 260px; background: linear-gradient(135deg, var(--navy-secondary) 0%, #11224e 100%);
-        height: 100vh; color: white; padding: 2rem 0 0; position: fixed; inset: 0 auto 0 0;
+        width: 280px; background: linear-gradient(180deg, var(--navy-secondary) 0%, #11224e 100%);
+        height: 100vh; color: white; padding: 0; position: fixed; inset: 0 auto 0 0;
         display: flex; flex-direction: column; overflow: hidden;
-        box-shadow: 2px 0 10px rgba(0, 0, 0, .1); z-index: 1000;
+        box-shadow: 4px 0 18px rgba(15, 23, 42, .14); z-index: 1040;
+        transition: transform .25s ease;
     }
-    .sidebar-brand { flex: 0 0 auto; padding: 0 1.5rem 2rem; border-bottom: 1px solid rgba(255,255,255,.1); margin-bottom: 1.25rem; text-align: center; }
-    .sidebar-brand i { font-size: 2.5rem; color: var(--amber-accent); display: block; margin-bottom: .5rem; }
-    .sidebar-brand h4 { font-size: 1.3rem; font-weight: 700; margin: 0; color: white; }
-    .sidebar nav { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding-bottom: 1rem; }
+    .sidebar-brand {
+        flex: 0 0 auto; min-height: 82px; padding: 1.25rem 1.4rem;
+        border-bottom: 1px solid rgba(255,255,255,.1);
+        display: flex; align-items: center; gap: .85rem;
+    }
+    .sidebar-brand i { font-size: 2rem; color: var(--amber-accent); }
+    .sidebar-brand h4 { font-size: 1.25rem; font-weight: 700; margin: 0; color: white; letter-spacing: .01em; }
+    .sidebar-brand small { display: block; color: rgba(255,255,255,.58); font-size: .72rem; margin-top: .1rem; }
+    .sidebar nav {
+        flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 1rem .75rem 1.5rem;
+        scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.22) transparent;
+    }
     .sidebar-menu { list-style: none; padding: 0; margin: 0; }
     .sidebar-menu-link {
-        display: flex; align-items: center; padding: .875rem 1.5rem; color: rgba(255,255,255,.72);
-        text-decoration: none; transition: all .2s ease; border-left: 3px solid transparent;
+        min-height: 46px; display: flex; align-items: center; gap: .8rem; padding: .72rem .9rem;
+        color: rgba(255,255,255,.72); border-radius: 8px; text-decoration: none;
+        transition: color .2s ease, background-color .2s ease, transform .2s ease;
+        border: 0;
     }
     .sidebar-menu-toggle {
-        width: 100%; background: transparent; border-top: 0; border-right: 0; border-bottom: 0;
-        text-align: left; cursor: pointer;
+        width: 100%; background: transparent; text-align: left; cursor: pointer;
     }
     .sidebar-menu-link:hover, .sidebar-menu-link.active {
-        color: white; background-color: rgba(255,255,255,.12); border-left-color: var(--amber-accent);
+        color: white; background-color: rgba(255,255,255,.12);
     }
+    .sidebar-menu-link.active { box-shadow: inset 3px 0 0 var(--amber-accent); background-color: rgba(255,255,255,.15); }
+    .sidebar-menu-link:hover { transform: translateX(2px); }
     .sidebar-menu-link:focus-visible {
-        color: white; outline: 2px solid var(--amber-accent); outline-offset: -2px;
+        color: white; outline: 2px solid var(--amber-accent); outline-offset: 1px;
     }
     .sidebar-menu-link.active { font-weight: 600; }
-    .sidebar-menu-link i { margin-right: .75rem; font-size: 1.1rem; }
-    .sidebar-menu-group { margin-top: .25rem; }
+    .sidebar-menu-link > i:first-child { flex: 0 0 20px; margin: 0; font-size: 1.05rem; text-align: center; }
+    .sidebar-menu-link > span { flex: 1; line-height: 1.25; }
+    .sidebar-menu-group { margin-top: .3rem; }
     .sidebar-menu-toggle .sidebar-menu-arrow {
-        margin: 0 0 0 auto; font-size: .8rem; transition: transform .2s ease;
+        flex: 0 0 auto; margin: 0; font-size: .75rem; transition: transform .2s ease;
     }
     .sidebar-menu-group.is-open .sidebar-menu-arrow { transform: rotate(180deg); }
-    .sidebar-submenu { display: none; background: rgba(0,0,0,.08); }
+    .sidebar-submenu { display: none; margin-top: .25rem; padding: .15rem 0 .3rem; }
     .sidebar-menu-group.is-open .sidebar-submenu { display: block; }
-    .sidebar-submenu .sidebar-menu-link { padding-left: 3.2rem; font-size: .92rem; }
-    .sidebar-submenu .sidebar-menu-link i { font-size: .55rem; }
-    .sidebar-footer { flex: 0 0 auto; padding: 1.5rem; border-top: 1px solid rgba(255,255,255,.1); background: rgba(0,0,0,.2); }
-    .sidebar-footer .btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: .5rem; }
-    .main-content { margin-left: 260px; flex: 1; padding: 2rem; min-width: 0; min-height: 100vh; }
+    .sidebar-submenu .sidebar-menu-link { min-height: 39px; padding: .55rem .75rem .55rem 2.85rem; font-size: .88rem; }
+    .sidebar-submenu .sidebar-menu-link > i:first-child { flex-basis: 8px; font-size: .35rem; }
+    .main-content { margin-left: 280px; flex: 1; padding: 2rem; min-width: 0; min-height: 100vh; }
     .topbar {
-        background: white; padding: 1rem 2rem; margin: -2rem -2rem 2rem; box-shadow: 0 2px 4px rgba(0,0,0,.05);
-        display: flex; justify-content: space-between; align-items: center;
+        min-height: 82px; background: white; padding: 1rem 2rem; margin: -2rem -2rem 2rem;
+        border-bottom: 1px solid #e5e7eb; box-shadow: 0 2px 8px rgba(15, 23, 42, .04);
+        display: flex; justify-content: space-between; align-items: center; gap: 1rem;
     }
     .topbar-title { font-size: 1.5rem; font-weight: 700; color: var(--navy-secondary); margin: 0; }
-    .topbar-user { display: flex; align-items: center; gap: .75rem; color: var(--navy-secondary); }
-    .topbar-user i { font-size: 1.5rem; }
+    .topbar-start { display: flex; align-items: center; gap: .75rem; min-width: 0; }
+    .sidebar-mobile-toggle { display: none; color: var(--navy-secondary); border-color: #dbe3f1; }
+    .topbar-user-toggle {
+        display: flex; align-items: center; gap: .7rem; padding: .45rem .6rem;
+        color: var(--navy-secondary); background: transparent; border: 1px solid transparent;
+        border-radius: 9px;
+    }
+    .topbar-user-toggle:hover, .topbar-user-toggle:focus, .topbar-user-toggle[aria-expanded="true"] {
+        color: var(--navy-secondary); background: #f8fafc; border-color: #e2e8f0;
+    }
+    .topbar-user-toggle::after { margin-left: .1rem; }
+    .topbar-avatar {
+        width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center;
+        flex: 0 0 38px; border-radius: 50%; background: #e8edfb; color: var(--navy-secondary);
+    }
+    .topbar-avatar i { font-size: 1.35rem; }
+    .topbar-user-copy { min-width: 0; text-align: left; line-height: 1.15; }
+    .topbar-user-name { display: block; max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+    .topbar-user-role { display: block; margin-top: .2rem; color: #64748b; font-size: .72rem; text-transform: capitalize; }
+    .topbar-profile-menu { min-width: 210px; padding: .45rem; border: 1px solid #e2e8f0; box-shadow: 0 12px 30px rgba(15,23,42,.12); }
+    .topbar-profile-menu .dropdown-item { border-radius: 7px; padding: .65rem .75rem; }
+    .topbar-profile-menu .dropdown-item:hover { background: #f1f5f9; }
+    .sidebar-backdrop { display: none; }
     .content-area { background: white; border-radius: 10px; padding: 2rem; min-height: 60vh; box-shadow: 0 2px 8px rgba(0,0,0,.05); }
     .btn-academic { background: var(--navy-secondary); color: white; border-color: var(--navy-secondary); }
     .btn-academic:hover { background: var(--navy-hover); color: white; border-color: var(--navy-hover); }
@@ -82,14 +115,23 @@
     .role-card { border: 1px solid #e5e7eb; border-radius: 10px; height: 100%; padding: 1.5rem; transition: transform .2s ease, box-shadow .2s ease; }
     .role-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(30,58,138,.09); }
     .role-icon { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: #e8edfb; color: var(--navy-secondary); font-size: 1.4rem; }
-    @media (max-width: 768px) {
-        .dashboard-wrapper { flex-direction: column; }
-        .sidebar { width: 100%; height: auto; position: relative; padding: 1rem 0 0; overflow: visible; }
-        .sidebar-brand { padding-bottom: 1rem; margin-bottom: .5rem; }
-        .sidebar nav { overflow: visible; padding-bottom: 0; }
-        .sidebar-footer { margin-top: 1rem; }
+    @media (max-width: 991.98px) {
+        body.sidebar-open { overflow: hidden; }
+        .sidebar { transform: translateX(-100%); }
+        .sidebar.is-open { transform: translateX(0); }
+        .sidebar-backdrop {
+            position: fixed; inset: 0; z-index: 1035; background: rgba(15, 23, 42, .5);
+        }
+        .sidebar-backdrop.is-visible { display: block; }
+        .sidebar-mobile-toggle { display: inline-flex; align-items: center; justify-content: center; }
         .main-content { margin-left: 0; padding: 1rem; }
-        .topbar { margin: -1rem -1rem 1rem; padding: 1rem; }
+        .topbar { min-height: 70px; margin: -1rem -1rem 1rem; padding: .75rem 1rem; }
+    }
+    @media (max-width: 575.98px) {
+        .sidebar { width: min(86vw, 300px); }
+        .topbar-title { font-size: 1.15rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .topbar-user-copy { display: none; }
+        .topbar-user-toggle { gap: .35rem; padding: .35rem .45rem; }
         .content-area { padding: 1.25rem; }
         .page-heading { align-items: flex-start; flex-direction: column; }
     }
@@ -99,10 +141,13 @@
 
 @section('content')
 <div class="dashboard-wrapper">
-    <aside class="sidebar">
+    <aside class="sidebar" id="dashboardSidebar">
         <div class="sidebar-brand">
             <i class="bi bi-mortarboard-fill"></i>
-            <h4>EduPulse</h4>
+            <div>
+                <h4>EduPulse</h4>
+                <small>School Management</small>
+            </div>
         </div>
 
         @php
@@ -115,6 +160,7 @@
             $teacherAssignmentMenuActive = request()->routeIs('super_admin.teacher_assignments.*');
             $attendanceMenuActive = request()->routeIs('attendance.*');
             $examinationMenuActive = request()->routeIs('examinations.*');
+            $marksMenuActive = request()->routeIs('marks.*');
             $isSuperAdmin = Auth::user()->role === 'super_admin';
             $isAdmin = Auth::user()->role === 'admin';
             $isExaminationManager = $isSuperAdmin || $isAdmin;
@@ -126,7 +172,7 @@
             };
         @endphp
 
-        <nav aria-label="Administration navigation">
+        <nav aria-label="Dashboard navigation">
             <ul class="sidebar-menu">
                 <li>
                     <a href="{{ route($dashboardRoute) }}" class="sidebar-menu-link {{ request()->routeIs($dashboardRoute) ? 'active' : '' }}">
@@ -395,24 +441,64 @@
                     <li><a href="{{ route('examinations.upcoming') }}" class="sidebar-menu-link {{ request()->routeIs('examinations.upcoming') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Upcoming Exams</span></a></li>
                 </ul>
             </div>
+
+            <div class="sidebar-menu-group {{ $marksMenuActive ? 'is-open' : '' }}" data-sidebar-group>
+                <button type="button" class="sidebar-menu-link sidebar-menu-toggle {{ $marksMenuActive ? 'active' : '' }}"
+                    aria-expanded="{{ $marksMenuActive ? 'true' : 'false' }}" aria-controls="marks-results-management-menu"
+                    data-sidebar-toggle>
+                    <i class="bi bi-bar-chart-line-fill"></i>
+                    <span>Marks / Results Management</span>
+                    <i class="bi bi-chevron-down sidebar-menu-arrow" aria-hidden="true"></i>
+                </button>
+                <ul class="sidebar-menu sidebar-submenu" id="marks-results-management-menu">
+                    @if (Auth::user()->role !== 'student')
+                        <li><a href="{{ route('marks.entry') }}" class="sidebar-menu-link {{ request()->routeIs('marks.entry', 'marks.store') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Marks Entry</span></a></li>
+                        <li><a href="{{ route('marks.index') }}" class="sidebar-menu-link {{ request()->routeIs('marks.index') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Marks List</span></a></li>
+                        <li><a href="{{ route('marks.index', ['manage' => 'edit']) }}" class="sidebar-menu-link {{ request()->routeIs('marks.edit', 'marks.update') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Edit Marks</span></a></li>
+                        <li><a href="{{ route('marks.result_sheet') }}" class="sidebar-menu-link {{ request()->routeIs('marks.result_sheet') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Result Sheet</span></a></li>
+                        <li><a href="{{ route('marks.class_report') }}" class="sidebar-menu-link {{ request()->routeIs('marks.class_report') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Class Result Report</span></a></li>
+                        <li><a href="{{ route('marks.subject_report') }}" class="sidebar-menu-link {{ request()->routeIs('marks.subject_report') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Subject Result Report</span></a></li>
+                    @else
+                        <li><a href="{{ route('marks.student_results') }}" class="sidebar-menu-link {{ request()->routeIs('marks.student_results') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Student Result View</span></a></li>
+                    @endif
+                </ul>
+            </div>
         </nav>
 
-        <div class="sidebar-footer">
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="btn btn-outline-light btn-sm">
-                    <i class="bi bi-box-arrow-right"></i> Logout
-                </button>
-            </form>
-        </div>
     </aside>
+    <button type="button" class="sidebar-backdrop border-0" data-sidebar-close aria-label="Close sidebar"></button>
 
     <main class="main-content">
         <div class="topbar">
-            <h2 class="topbar-title">{{ $pageTitle ?? 'Dashboard' }}</h2>
-            <div class="topbar-user">
-                <i class="bi bi-person-circle"></i>
-                <span>{{ Auth::user()->first_name }} {{ Auth::user()->last_name }}</span>
+            <div class="topbar-start">
+                <button type="button" class="btn sidebar-mobile-toggle" data-sidebar-open
+                    aria-controls="dashboardSidebar" aria-expanded="false" aria-label="Open sidebar">
+                    <i class="bi bi-list fs-4"></i>
+                </button>
+                <h2 class="topbar-title">{{ $pageTitle ?? 'Dashboard' }}</h2>
+            </div>
+            <div class="dropdown">
+                <button type="button" class="btn dropdown-toggle topbar-user-toggle" data-bs-toggle="dropdown"
+                    aria-expanded="false" aria-label="Open user menu">
+                    <span class="topbar-avatar"><i class="bi bi-person-fill"></i></span>
+                    <span class="topbar-user-copy">
+                        <span class="topbar-user-name">{{ Auth::user()->first_name }} {{ Auth::user()->last_name }}</span>
+                        <span class="topbar-user-role">{{ str_replace('_', ' ', Auth::user()->role) }}</span>
+                    </span>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end topbar-profile-menu">
+                    <div class="px-2 py-2 d-sm-none">
+                        <div class="fw-semibold text-navy">{{ Auth::user()->first_name }} {{ Auth::user()->last_name }}</div>
+                        <small class="text-muted text-capitalize">{{ str_replace('_', ' ', Auth::user()->role) }}</small>
+                    </div>
+                    <div class="dropdown-divider d-sm-none"></div>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="dropdown-item text-danger">
+                            <i class="bi bi-box-arrow-right me-2"></i>Logout
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
 
@@ -441,10 +527,40 @@
     document.querySelectorAll('[data-sidebar-toggle]').forEach((toggle) => {
         toggle.addEventListener('click', () => {
             const group = toggle.closest('[data-sidebar-group]');
-            const isOpen = group.classList.toggle('is-open');
+            const willOpen = !group.classList.contains('is-open');
 
-            toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            document.querySelectorAll('[data-sidebar-group].is-open').forEach((openGroup) => {
+                if (openGroup !== group) {
+                    openGroup.classList.remove('is-open');
+                    openGroup.querySelector('[data-sidebar-toggle]')?.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            group.classList.toggle('is-open', willOpen);
+            toggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
         });
+    });
+
+    const sidebar = document.getElementById('dashboardSidebar');
+    const sidebarBackdrop = document.querySelector('[data-sidebar-close]');
+    const sidebarOpenButton = document.querySelector('[data-sidebar-open]');
+
+    const setSidebarOpen = (isOpen) => {
+        sidebar.classList.toggle('is-open', isOpen);
+        sidebarBackdrop.classList.toggle('is-visible', isOpen);
+        document.body.classList.toggle('sidebar-open', isOpen);
+        sidebarOpenButton.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    };
+
+    sidebarOpenButton.addEventListener('click', () => setSidebarOpen(true));
+    sidebarBackdrop.addEventListener('click', () => setSidebarOpen(false));
+    sidebar.querySelectorAll('a').forEach((link) => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth < 992) setSidebarOpen(false);
+        });
+    });
+    window.addEventListener('resize', () => {
+        if (window.innerWidth >= 992) setSidebarOpen(false);
     });
 </script>
 @endsection

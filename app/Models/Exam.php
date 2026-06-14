@@ -57,6 +57,16 @@ class Exam extends Model
         return $this->hasMany(ExamSchedule::class);
     }
 
+    public function marks(): HasMany
+    {
+        return $this->hasMany(Mark::class);
+    }
+
+    public function results(): HasMany
+    {
+        return $this->hasMany(Result::class);
+    }
+
     public function scopeUpcoming(Builder $query): Builder
     {
         return $query->whereDate('start_date', '>=', today());

@@ -39,4 +39,9 @@ class Subject extends Model
     {
         return $this->hasMany(ExamSchedule::class);
     }
+
+    public function marks(): HasMany
+    {
+        return $this->hasMany(Mark::class);
+    }
 }
