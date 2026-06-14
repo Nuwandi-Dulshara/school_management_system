@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\SchoolClass;
+use App\Models\SchoolSection;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -33,6 +35,11 @@ class SuperAdminStudentManagementTest extends TestCase
     public function test_super_admin_can_register_student_with_guardian_details(): void
     {
         $superAdmin = User::factory()->create(['role' => 'super_admin']);
+        $schoolClass = SchoolClass::factory()->create(['name' => '10']);
+        $schoolSection = SchoolSection::factory()->create([
+            'school_class_id' => $schoolClass->id,
+            'name' => 'A',
+        ]);
 
         $response = $this->actingAs($superAdmin)
             ->post(route('super_admin.students.store'), $this->studentPayload());
@@ -45,6 +52,8 @@ class SuperAdminStudentManagementTest extends TestCase
             'admission_number' => 'ADM-2026-001',
             'full_name' => 'Amal Perera',
             'status' => 'active',
+            'school_class_id' => $schoolClass->id,
+            'school_section_id' => $schoolSection->id,
         ]);
         $this->assertDatabaseHas('student_guardians', [
             'student_id' => $student->id,

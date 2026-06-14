@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
+use App\Models\SchoolClass;
 use App\Models\Student;
 use App\Models\StudentDocument;
 use Illuminate\Http\RedirectResponse;
@@ -240,7 +241,7 @@ class StudentManagementController extends Controller
 
     private function studentData(array $validated): array
     {
-        return collect($validated)
+        $data = collect($validated)
             ->except([
                 'guardian_name',
                 'relationship',
@@ -249,6 +250,18 @@ class StudentManagementController extends Controller
                 'guardian_address',
             ])
             ->all();
+
+        $schoolClass = SchoolClass::query()
+            ->where('name', $validated['class'])
+            ->first();
+        $schoolSection = $schoolClass?->sections()
+            ->where('name', $validated['section'])
+            ->first();
+
+        $data['school_class_id'] = $schoolClass?->id;
+        $data['school_section_id'] = $schoolSection?->id;
+
+        return $data;
     }
 
     private function guardianData(array $validated): array
