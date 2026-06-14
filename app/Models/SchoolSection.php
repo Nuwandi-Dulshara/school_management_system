@@ -39,4 +39,14 @@ class SchoolSection extends Model
     {
         return $this->hasMany(StudentClassAssignment::class);
     }
+
+    public function attendances(): HasMany
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
+    public function exams(): HasMany
+    {
+        return $this->hasMany(Exam::class);
+    }
 }

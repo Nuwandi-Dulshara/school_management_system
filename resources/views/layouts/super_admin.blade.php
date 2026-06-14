@@ -69,6 +69,11 @@
     .status-graduated { color: #5b21b6; background: #ede9fe; }
     .status-assigned { color: #166534; background: #dcfce7; }
     .status-removed { color: #991b1b; background: #fee2e2; }
+    .status-attendance-present { color: #166534; background: #dcfce7; }
+    .status-attendance-absent { color: #991b1b; background: #fee2e2; }
+    .status-attendance-late { color: #92400e; background: #fef3c7; }
+    .status-draft { color: #92400e; background: #fef3c7; }
+    .status-published { color: #166534; background: #dcfce7; }
     .role-badge { color: var(--navy-secondary); background: #e8edfb; border-radius: 999px; padding: .3rem .65rem; font-size: .78rem; font-weight: 600; }
     .empty-state { text-align: center; padding: 4rem 1rem; color: #6b7280; }
     .empty-state i { font-size: 3rem; color: #cbd5e1; display: block; margin-bottom: 1rem; }
@@ -108,17 +113,29 @@
             $subjectMenuActive = request()->routeIs('super_admin.subjects.*');
             $assignmentMenuActive = request()->routeIs('super_admin.student_assignments.*');
             $teacherAssignmentMenuActive = request()->routeIs('super_admin.teacher_assignments.*');
+            $attendanceMenuActive = request()->routeIs('attendance.*');
+            $examinationMenuActive = request()->routeIs('examinations.*');
+            $isSuperAdmin = Auth::user()->role === 'super_admin';
+            $isAdmin = Auth::user()->role === 'admin';
+            $isExaminationManager = $isSuperAdmin || $isAdmin;
+            $dashboardRoute = match (Auth::user()->role) {
+                'super_admin' => 'dashboard.super_admin',
+                'admin' => 'dashboard.admin',
+                'teacher' => 'dashboard.teacher',
+                default => 'dashboard.student',
+            };
         @endphp
 
-        <nav aria-label="Super Admin navigation">
+        <nav aria-label="Administration navigation">
             <ul class="sidebar-menu">
                 <li>
-                    <a href="{{ route('dashboard.super_admin') }}" class="sidebar-menu-link {{ request()->routeIs('dashboard.super_admin') ? 'active' : '' }}">
+                    <a href="{{ route($dashboardRoute) }}" class="sidebar-menu-link {{ request()->routeIs($dashboardRoute) ? 'active' : '' }}">
                         <i class="bi bi-speedometer2"></i><span>Dashboard</span>
                     </a>
                 </li>
             </ul>
 
+            @if ($isSuperAdmin)
             <div class="sidebar-menu-group {{ $userMenuActive ? 'is-open' : '' }}" data-sidebar-group>
                 <button type="button" class="sidebar-menu-link sidebar-menu-toggle {{ $userMenuActive ? 'active' : '' }}"
                     aria-expanded="{{ $userMenuActive ? 'true' : 'false' }}" aria-controls="user-management-menu"
@@ -335,6 +352,47 @@
                             <i class="bi bi-circle-fill"></i><span>Subject-wise Teacher List</span>
                         </a>
                     </li>
+                </ul>
+            </div>
+            @endif
+
+            @if ($isExaminationManager)
+            <div class="sidebar-menu-group {{ $attendanceMenuActive ? 'is-open' : '' }}" data-sidebar-group>
+                <button type="button" class="sidebar-menu-link sidebar-menu-toggle {{ $attendanceMenuActive ? 'active' : '' }}"
+                    aria-expanded="{{ $attendanceMenuActive ? 'true' : 'false' }}" aria-controls="attendance-management-menu"
+                    data-sidebar-toggle>
+                    <i class="bi bi-calendar2-check-fill"></i>
+                    <span>Attendance Management</span>
+                    <i class="bi bi-chevron-down sidebar-menu-arrow" aria-hidden="true"></i>
+                </button>
+                <ul class="sidebar-menu sidebar-submenu" id="attendance-management-menu">
+                    <li><a href="{{ route('attendance.mark') }}" class="sidebar-menu-link {{ request()->routeIs('attendance.mark', 'attendance.store') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Mark Attendance</span></a></li>
+                    <li><a href="{{ route('attendance.index') }}" class="sidebar-menu-link {{ request()->routeIs('attendance.index') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Attendance List</span></a></li>
+                    <li><a href="{{ route('attendance.edit_list') }}" class="sidebar-menu-link {{ request()->routeIs('attendance.edit_list', 'attendance.edit', 'attendance.update') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Edit Attendance</span></a></li>
+                    <li><a href="{{ route('attendance.student_history') }}" class="sidebar-menu-link {{ request()->routeIs('attendance.student_history') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Student Attendance History</span></a></li>
+                    <li><a href="{{ route('attendance.class_report') }}" class="sidebar-menu-link {{ request()->routeIs('attendance.class_report') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Class Attendance Report</span></a></li>
+                    <li><a href="{{ route('attendance.daily_report') }}" class="sidebar-menu-link {{ request()->routeIs('attendance.daily_report') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Daily Attendance Report</span></a></li>
+                </ul>
+            </div>
+            @endif
+
+            <div class="sidebar-menu-group {{ $examinationMenuActive ? 'is-open' : '' }}" data-sidebar-group>
+                <button type="button" class="sidebar-menu-link sidebar-menu-toggle {{ $examinationMenuActive ? 'active' : '' }}"
+                    aria-expanded="{{ $examinationMenuActive ? 'true' : 'false' }}" aria-controls="examination-management-menu"
+                    data-sidebar-toggle>
+                    <i class="bi bi-clipboard2-data-fill"></i>
+                    <span>Examination Management</span>
+                    <i class="bi bi-chevron-down sidebar-menu-arrow" aria-hidden="true"></i>
+                </button>
+                <ul class="sidebar-menu sidebar-submenu" id="examination-management-menu">
+                    <li><a href="{{ route('examinations.index') }}" class="sidebar-menu-link {{ request()->routeIs('examinations.index', 'examinations.edit') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Exam List</span></a></li>
+                    @if ($isExaminationManager)
+                        <li><a href="{{ route('examinations.create') }}" class="sidebar-menu-link {{ request()->routeIs('examinations.create') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Add Exam</span></a></li>
+                        <li><a href="{{ route('examinations.index', ['manage' => 'edit']) }}" class="sidebar-menu-link"><i class="bi bi-circle-fill"></i><span>Edit Exam</span></a></li>
+                    @endif
+                    <li><a href="{{ route('examinations.schedules.index') }}" class="sidebar-menu-link {{ request()->routeIs('examinations.schedules.*') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Exam Schedule</span></a></li>
+                    <li><a href="{{ route('examinations.class_exams') }}" class="sidebar-menu-link {{ request()->routeIs('examinations.class_exams') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Class Exam List</span></a></li>
+                    <li><a href="{{ route('examinations.upcoming') }}" class="sidebar-menu-link {{ request()->routeIs('examinations.upcoming') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Upcoming Exams</span></a></li>
                 </ul>
             </div>
         </nav>

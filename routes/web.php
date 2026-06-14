@@ -1,10 +1,13 @@
 <?php
 
+use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\ExaminationController;
+use App\Http\Controllers\ExamScheduleController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\SuperAdmin\ClassSectionManagementController;
-use App\Http\Controllers\SuperAdmin\StudentManagementController;
 use App\Http\Controllers\SuperAdmin\StudentClassAssignmentController;
+use App\Http\Controllers\SuperAdmin\StudentManagementController;
 use App\Http\Controllers\SuperAdmin\SubjectManagementController;
 use App\Http\Controllers\SuperAdmin\TeacherManagementController;
 use App\Http\Controllers\SuperAdmin\TeacherSubjectAssignmentController;
@@ -138,4 +141,35 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/student', function () {
         return view('dashboards.student');
     })->name('dashboard.student');
+});
+
+Route::middleware(['auth', 'attendance_manager'])->prefix('attendance')->name('attendance.')->group(function () {
+    Route::get('/mark', [AttendanceController::class, 'mark'])->name('mark');
+    Route::post('/', [AttendanceController::class, 'store'])->name('store');
+    Route::get('/', [AttendanceController::class, 'index'])->name('index');
+    Route::get('/edit', [AttendanceController::class, 'editList'])->name('edit_list');
+    Route::get('/student-history', [AttendanceController::class, 'studentHistory'])->name('student_history');
+    Route::get('/class-report', [AttendanceController::class, 'classReport'])->name('class_report');
+    Route::get('/daily-report', [AttendanceController::class, 'dailyReport'])->name('daily_report');
+    Route::get('/{attendance}/edit', [AttendanceController::class, 'edit'])->name('edit');
+    Route::put('/{attendance}', [AttendanceController::class, 'update'])->name('update');
+    Route::delete('/{attendance}', [AttendanceController::class, 'destroy'])->name('destroy');
+});
+
+Route::middleware('auth')->prefix('examinations')->name('examinations.')->group(function () {
+    Route::get('/', [ExaminationController::class, 'index'])->name('index');
+    Route::get('/class-exams', [ExaminationController::class, 'classExams'])->name('class_exams');
+    Route::get('/upcoming', [ExaminationController::class, 'upcoming'])->name('upcoming');
+    Route::get('/schedules', [ExamScheduleController::class, 'index'])->name('schedules.index');
+
+    Route::middleware('examination_manager')->group(function () {
+        Route::get('/create', [ExaminationController::class, 'create'])->name('create');
+        Route::post('/', [ExaminationController::class, 'store'])->name('store');
+        Route::get('/{exam}/edit', [ExaminationController::class, 'edit'])->name('edit');
+        Route::put('/{exam}', [ExaminationController::class, 'update'])->name('update');
+        Route::delete('/{exam}', [ExaminationController::class, 'destroy'])->name('destroy');
+        Route::post('/schedules', [ExamScheduleController::class, 'store'])->name('schedules.store');
+        Route::put('/schedules/{examSchedule}', [ExamScheduleController::class, 'update'])->name('schedules.update');
+        Route::delete('/schedules/{examSchedule}', [ExamScheduleController::class, 'destroy'])->name('schedules.destroy');
+    });
 });
