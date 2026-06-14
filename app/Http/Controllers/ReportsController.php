@@ -350,7 +350,7 @@ class ReportsController extends Controller
 
         $years = $request->filled('academic_year')
             ? collect([$request->academic_year])
-            : $this->availableAcademicYears();
+            : $this->reportAcademicYears($request);
 
         $rows = $years->map(function (string $year) use ($request) {
             $studentIds = StudentClassAssignment::query()
@@ -444,15 +444,22 @@ class ReportsController extends Controller
             $exams->where('school_class_id', $student?->school_class_id ?? 0)->where('status', 'published');
         }
 
+        $sections = SchoolSection::query()->with('schoolClass')->orderBy('name');
+        if ($request->user()->role === 'teacher') {
+            $sections->whereIn('school_class_id', $this->teacherClassIds($request));
+        } elseif ($request->user()->role === 'student') {
+            $sections->whereKey($this->linkedStudent($request)?->school_section_id ?? 0);
+        }
+
         return [
             'classes' => $classes->get(),
-            'sections' => SchoolSection::orderBy('name')->get(),
+            'sections' => $sections->get(),
             'studentsFilter' => $students->get(),
             'subjects' => $subjects->get(),
             'examsFilter' => $exams->get(),
             'examTypes' => ExamType::orderBy('name')->get(),
             'feeTypes' => FeeType::orderBy('name')->get(),
-            'academicYears' => $this->availableAcademicYears(),
+            'academicYears' => $this->reportAcademicYears($request),
         ];
     }
 
@@ -464,6 +471,34 @@ class ReportsController extends Controller
             ->merge(Mark::query()->distinct()->pluck('academic_year'))
             ->merge(FeeAssignment::query()->distinct()->pluck('academic_year'))
             ->filter()->unique()->sortDesc()->values();
+    }
+
+    private function reportAcademicYears(Request $request): Collection
+    {
+        if ($request->user()->role === 'student') {
+            return StudentClassAssignment::query()
+                ->where('student_id', $this->linkedStudent($request)?->id ?? 0)
+                ->distinct()
+                ->pluck('academic_year')
+                ->filter()
+                ->sortDesc()
+                ->values();
+        }
+
+        if ($request->user()->role === 'teacher') {
+            $classIds = $this->teacherClassIds($request);
+
+            return collect()
+                ->merge(StudentClassAssignment::query()->whereIn('school_class_id', $classIds)->distinct()->pluck('academic_year'))
+                ->merge(Exam::query()->whereIn('school_class_id', $classIds)->distinct()->pluck('academic_year'))
+                ->merge(Mark::query()->whereIn('school_class_id', $classIds)->distinct()->pluck('academic_year'))
+                ->filter()
+                ->unique()
+                ->sortDesc()
+                ->values();
+        }
+
+        return $this->availableAcademicYears();
     }
 
     private function authorizeReport(Request $request, array $roles): void
@@ -500,6 +535,11 @@ class ReportsController extends Controller
     {
         if ($request->user()->role === 'teacher') {
             $assignments = $this->teacherAssignments($request);
+            if ($assignments->isEmpty()) {
+                $query->whereRaw('1 = 0');
+
+                return;
+            }
             $query->where(function (Builder $query) use ($assignments) {
                 foreach ($assignments as $assignment) {
                     $query->orWhere(fn (Builder $pair) => $pair

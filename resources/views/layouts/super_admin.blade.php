@@ -565,7 +565,13 @@
             <div class="dropdown">
                 <button type="button" class="btn dropdown-toggle topbar-user-toggle" data-bs-toggle="dropdown"
                     aria-expanded="false" aria-label="Open user menu">
-                    <span class="topbar-avatar"><i class="bi bi-person-fill"></i></span>
+                    <span class="topbar-avatar">
+                        @if(Auth::user()->profile_picture)
+                            <img src="{{ asset('storage/'.Auth::user()->profile_picture) }}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+                        @else
+                            <i class="bi bi-person-fill"></i>
+                        @endif
+                    </span>
                     <span class="topbar-user-copy">
                         <span class="topbar-user-name">{{ Auth::user()->first_name }} {{ Auth::user()->last_name }}</span>
                         <span class="topbar-user-role">{{ str_replace('_', ' ', Auth::user()->role) }}</span>
@@ -577,6 +583,16 @@
                         <small class="text-muted text-capitalize">{{ str_replace('_', ' ', Auth::user()->role) }}</small>
                     </div>
                     <div class="dropdown-divider d-sm-none"></div>
+                    <a href="{{ route('profile.index') }}" class="dropdown-item {{ request()->routeIs('profile.index') ? 'active' : '' }}">
+                        <i class="bi bi-person-circle me-2"></i>My Profile
+                    </a>
+                    <a href="{{ route('profile.edit') }}" class="dropdown-item {{ request()->routeIs('profile.edit', 'profile.update') ? 'active' : '' }}">
+                        <i class="bi bi-pencil-square me-2"></i>Edit Profile
+                    </a>
+                    <a href="{{ route('profile.password.edit') }}" class="dropdown-item {{ request()->routeIs('profile.password.*') ? 'active' : '' }}">
+                        <i class="bi bi-key me-2"></i>Change Password
+                    </a>
+                    <div class="dropdown-divider"></div>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="dropdown-item text-danger">

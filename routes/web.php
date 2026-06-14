@@ -8,6 +8,7 @@ use App\Http\Controllers\FeesController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MarksResultController;
 use App\Http\Controllers\NoticeController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\SuperAdmin\ClassSectionManagementController;
@@ -136,6 +137,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/admin', [DashboardController::class, 'admin'])->name('dashboard.admin');
     Route::get('/dashboard/teacher', [DashboardController::class, 'teacher'])->name('dashboard.teacher');
     Route::get('/dashboard/student', [DashboardController::class, 'student'])->name('dashboard.student');
+
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile/change-password', [ProfileController::class, 'changePassword'])->name('profile.password.edit');
+    Route::put('/profile/change-password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 });
 
 Route::middleware(['auth', 'attendance_manager'])->prefix('attendance')->name('attendance.')->group(function () {
