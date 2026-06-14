@@ -102,6 +102,10 @@ class TeacherManagementController extends Controller
             'status' => $teacher->status === 'active' ? 'inactive' : 'active',
         ]);
 
+        if ($teacher->status === 'inactive') {
+            $teacher->teachingAssignments()->update(['status' => 'inactive']);
+        }
+
         return back()->with('success', "Teacher profile marked as {$teacher->status}.");
     }
 

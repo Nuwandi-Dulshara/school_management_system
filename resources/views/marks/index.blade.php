@@ -1,0 +1,18 @@
+@extends('layouts.super_admin', ['pageTitle' => 'Marks List'])
+
+@section('super_admin_content')
+<div class="page-heading"><div><h1>Marks List</h1><p>Search, review, edit, publish, or remove saved marks.</p></div><a href="{{ route('marks.entry') }}" class="btn btn-academic"><i class="bi bi-plus-lg me-2"></i>Enter Marks</a></div>
+<form method="GET" class="row g-2 mb-4">
+    <div class="col-lg-2"><select name="exam_id" class="form-select"><option value="">All exams</option>@foreach ($exams as $exam)<option value="{{ $exam->id }}" @selected((string) request('exam_id') === (string) $exam->id)>{{ $exam->exam_name }}</option>@endforeach</select></div>
+    <div class="col-lg-2"><select name="class_id" class="form-select"><option value="">All classes</option>@foreach ($classes as $class)<option value="{{ $class->id }}" @selected((string) request('class_id') === (string) $class->id)>{{ $class->name }}</option>@endforeach</select></div>
+    <div class="col-lg-2"><select name="section_id" class="form-select"><option value="">All sections</option>@foreach ($classes as $class)@foreach ($class->sections as $section)<option value="{{ $section->id }}" @selected((string) request('section_id') === (string) $section->id)>{{ $class->name }} - {{ $section->name }}</option>@endforeach @endforeach</select></div>
+    <div class="col-lg-2"><select name="subject_id" class="form-select"><option value="">All subjects</option>@foreach ($subjects as $subject)<option value="{{ $subject->id }}" @selected((string) request('subject_id') === (string) $subject->id)>{{ $subject->name }}</option>@endforeach</select></div>
+    <div class="col-lg-2"><select name="student_id" class="form-select"><option value="">All students</option>@foreach ($students as $student)<option value="{{ $student->id }}" @selected((string) request('student_id') === (string) $student->id)>{{ $student->full_name }}</option>@endforeach</select></div>
+    <div class="col-lg-2 d-flex gap-2"><button class="btn btn-academic flex-grow-1">Filter</button><a href="{{ route('marks.index') }}" class="btn btn-outline-secondary">Clear</a></div>
+</form>
+<div class="table-responsive"><table class="table table-hover">
+    <thead><tr><th>Exam</th><th>Class / Section</th><th>Subject</th><th>Student</th><th>Marks</th><th>Grade</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+    <tbody>@forelse ($marks as $mark)<tr><td>{{ $mark->exam->exam_name }}</td><td>{{ $mark->schoolClass->name }} / {{ $mark->schoolSection->name }}</td><td>{{ $mark->subject->name }}</td><td><span class="fw-semibold">{{ $mark->student->full_name }}</span><br><small class="text-muted">{{ $mark->student->admission_number }}</small></td><td>{{ number_format($mark->marks_obtained, 2) }} / {{ number_format($mark->maximum_marks, 2) }}</td><td><span class="role-badge">{{ $mark->grade }}</span></td><td><span class="status-badge status-{{ $mark->status }}">{{ $statuses[$mark->status] }}</span></td><td><div class="d-flex justify-content-end gap-1"><a href="{{ route('marks.edit', $mark) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a><form method="POST" action="{{ route('marks.destroy', $mark) }}" onsubmit="return confirm('Delete this mark record?');">@csrf @method('DELETE')<button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button></form></div></td></tr>@empty<tr><td colspan="8"><div class="empty-state"><i class="bi bi-bar-chart"></i><h5>No marks found</h5></div></td></tr>@endforelse</tbody>
+</table></div>
+@if ($marks->hasPages())<div class="mt-4">{{ $marks->links() }}</div>@endif
+@endsection
