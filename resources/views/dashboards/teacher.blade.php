@@ -7,4 +7,5 @@
         <p>View published examination schedules for your assigned classes.</p>
     </div>
 </div>
+@include('dashboards._notices')
 @endsection

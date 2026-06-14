@@ -1,10 +1,14 @@
 <?php
 
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExaminationController;
 use App\Http\Controllers\ExamScheduleController;
+use App\Http\Controllers\FeesController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MarksResultController;
+use App\Http\Controllers\NoticeController;
+use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\SuperAdmin\ClassSectionManagementController;
 use App\Http\Controllers\SuperAdmin\StudentClassAssignmentController;
@@ -30,9 +34,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Role-based dashboard routes
 Route::middleware(['auth', 'super_admin'])->prefix('dashboard/super-admin')->group(function () {
-    Route::get('/', function () {
-        return view('dashboards.super_admin');
-    })->name('dashboard.super_admin');
+    Route::get('/', [DashboardController::class, 'superAdmin'])->name('dashboard.super_admin');
 
     Route::get('/users', [UserManagementController::class, 'index'])->name('super_admin.users.index');
     Route::get('/users/create', [UserManagementController::class, 'create'])->name('super_admin.users.create');
@@ -131,17 +133,9 @@ Route::middleware(['auth', 'super_admin'])->prefix('dashboard/super-admin')->gro
 });
 
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard/admin', function () {
-        return view('dashboards.admin');
-    })->name('dashboard.admin');
-
-    Route::get('/dashboard/teacher', function () {
-        return view('dashboards.teacher');
-    })->name('dashboard.teacher');
-
-    Route::get('/dashboard/student', function () {
-        return view('dashboards.student');
-    })->name('dashboard.student');
+    Route::get('/dashboard/admin', [DashboardController::class, 'admin'])->name('dashboard.admin');
+    Route::get('/dashboard/teacher', [DashboardController::class, 'teacher'])->name('dashboard.teacher');
+    Route::get('/dashboard/student', [DashboardController::class, 'student'])->name('dashboard.student');
 });
 
 Route::middleware(['auth', 'attendance_manager'])->prefix('attendance')->name('attendance.')->group(function () {
@@ -189,3 +183,58 @@ Route::middleware(['auth', 'marks_manager'])->prefix('marks')->name('marks.')->g
 
 Route::middleware('auth')->get('/student-results', [MarksResultController::class, 'studentResults'])
     ->name('marks.student_results');
+
+Route::middleware(['auth', 'fees_manager'])->prefix('fees')->name('fees.')->group(function () {
+    Route::get('/types', [FeesController::class, 'feeTypes'])->name('types.index');
+    Route::get('/types/create', [FeesController::class, 'createFeeType'])->name('types.create');
+    Route::post('/types', [FeesController::class, 'storeFeeType'])->name('types.store');
+    Route::get('/types/{feeType}/edit', [FeesController::class, 'editFeeType'])->name('types.edit');
+    Route::put('/types/{feeType}', [FeesController::class, 'updateFeeType'])->name('types.update');
+    Route::delete('/types/{feeType}', [FeesController::class, 'destroyFeeType'])->name('types.destroy');
+
+    Route::get('/assign', [FeesController::class, 'assign'])->name('assign');
+    Route::post('/assignments', [FeesController::class, 'storeAssignment'])->name('assignments.store');
+    Route::put('/assignments/{feeAssignment}', [FeesController::class, 'updateAssignment'])->name('assignments.update');
+    Route::delete('/assignments/{feeAssignment}', [FeesController::class, 'destroyAssignment'])->name('assignments.destroy');
+
+    Route::get('/assignments/{feeAssignment}/payment', [FeesController::class, 'paymentForm'])->name('payments.create');
+    Route::post('/assignments/{feeAssignment}/payments', [FeesController::class, 'storePayment'])->name('payments.store');
+    Route::get('/payments/{feePayment}/edit', [FeesController::class, 'editPayment'])->name('payments.edit');
+    Route::put('/payments/{feePayment}', [FeesController::class, 'updatePayment'])->name('payments.update');
+    Route::delete('/payments/{feePayment}', [FeesController::class, 'destroyPayment'])->name('payments.destroy');
+    Route::get('/pending', [FeesController::class, 'pending'])->name('pending');
+});
+
+Route::middleware('auth')->prefix('fees')->name('fees.')->group(function () {
+    Route::get('/assignments', [FeesController::class, 'assignments'])->name('assignments.index');
+    Route::get('/assignments/{feeAssignment}', [FeesController::class, 'showAssignment'])->name('assignments.show');
+    Route::get('/payments', [FeesController::class, 'paymentHistory'])->name('payments.index');
+    Route::get('/receipts/{feePayment}', [FeesController::class, 'receipt'])->name('receipt');
+});
+
+Route::middleware('auth')->prefix('notices')->name('notices.')->group(function () {
+    Route::get('/published', [NoticeController::class, 'published'])->name('published');
+
+    Route::middleware('notices_manager')->group(function () {
+        Route::get('/', [NoticeController::class, 'index'])->name('index');
+        Route::get('/create', [NoticeController::class, 'create'])->name('create');
+        Route::post('/', [NoticeController::class, 'store'])->name('store');
+        Route::get('/{notice}/edit', [NoticeController::class, 'edit'])->name('edit');
+        Route::put('/{notice}', [NoticeController::class, 'update'])->name('update');
+        Route::patch('/{notice}/publish', [NoticeController::class, 'togglePublish'])->name('publish');
+        Route::delete('/{notice}', [NoticeController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::get('/{notice}', [NoticeController::class, 'show'])->name('show');
+});
+
+Route::middleware('auth')->prefix('reports')->name('reports.')->group(function () {
+    Route::get('/students', [ReportsController::class, 'students'])->name('students');
+    Route::get('/teachers', [ReportsController::class, 'teachers'])->name('teachers');
+    Route::get('/attendance', [ReportsController::class, 'attendance'])->name('attendance');
+    Route::get('/exams', [ReportsController::class, 'exams'])->name('exams');
+    Route::get('/marks', [ReportsController::class, 'marks'])->name('marks');
+    Route::get('/fees', [ReportsController::class, 'fees'])->name('fees');
+    Route::get('/classes', [ReportsController::class, 'classes'])->name('classes');
+    Route::get('/academic-years', [ReportsController::class, 'academicYears'])->name('academic_years');
+});

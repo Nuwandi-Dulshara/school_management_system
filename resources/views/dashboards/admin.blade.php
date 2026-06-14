@@ -7,4 +7,5 @@
         <p>Use the Attendance Management menu to manage daily student attendance and reports.</p>
     </div>
 </div>
+@include('dashboards._notices')
 @endsection

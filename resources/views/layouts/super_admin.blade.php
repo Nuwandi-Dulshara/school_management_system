@@ -107,6 +107,13 @@
     .status-attendance-late { color: #92400e; background: #fef3c7; }
     .status-draft { color: #92400e; background: #fef3c7; }
     .status-published { color: #166534; background: #dcfce7; }
+    .status-paid { color: #166534; background: #dcfce7; }
+    .status-partially_paid { color: #1e40af; background: #dbeafe; }
+    .status-unpaid { color: #92400e; background: #fef3c7; }
+    .status-overdue { color: #991b1b; background: #fee2e2; }
+    .priority-normal { color: #475569; background: #e2e8f0; }
+    .priority-important { color: #92400e; background: #fef3c7; }
+    .priority-urgent { color: #991b1b; background: #fee2e2; }
     .role-badge { color: var(--navy-secondary); background: #e8edfb; border-radius: 999px; padding: .3rem .65rem; font-size: .78rem; font-weight: 600; }
     .empty-state { text-align: center; padding: 4rem 1rem; color: #6b7280; }
     .empty-state i { font-size: 3rem; color: #cbd5e1; display: block; margin-bottom: 1rem; }
@@ -161,6 +168,9 @@
             $attendanceMenuActive = request()->routeIs('attendance.*');
             $examinationMenuActive = request()->routeIs('examinations.*');
             $marksMenuActive = request()->routeIs('marks.*');
+            $feesMenuActive = request()->routeIs('fees.*');
+            $noticesMenuActive = request()->routeIs('notices.*');
+            $reportsMenuActive = request()->routeIs('reports.*');
             $isSuperAdmin = Auth::user()->role === 'super_admin';
             $isAdmin = Auth::user()->role === 'admin';
             $isExaminationManager = $isSuperAdmin || $isAdmin;
@@ -461,6 +471,81 @@
                     @else
                         <li><a href="{{ route('marks.student_results') }}" class="sidebar-menu-link {{ request()->routeIs('marks.student_results') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Student Result View</span></a></li>
                     @endif
+                </ul>
+            </div>
+
+            @if ($isExaminationManager || Auth::user()->role === 'student')
+            <div class="sidebar-menu-group {{ $feesMenuActive ? 'is-open' : '' }}" data-sidebar-group>
+                <button type="button" class="sidebar-menu-link sidebar-menu-toggle {{ $feesMenuActive ? 'active' : '' }}"
+                    aria-expanded="{{ $feesMenuActive ? 'true' : 'false' }}" aria-controls="fees-management-menu"
+                    data-sidebar-toggle>
+                    <i class="bi bi-cash-stack"></i>
+                    <span>Fees Management</span>
+                    <i class="bi bi-chevron-down sidebar-menu-arrow" aria-hidden="true"></i>
+                </button>
+                <ul class="sidebar-menu sidebar-submenu" id="fees-management-menu">
+                    @if ($isExaminationManager)
+                        <li><a href="{{ route('fees.types.index') }}" class="sidebar-menu-link {{ request()->routeIs('fees.types.index', 'fees.types.edit') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Fee Types</span></a></li>
+                        <li><a href="{{ route('fees.types.create') }}" class="sidebar-menu-link {{ request()->routeIs('fees.types.create') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Add Fee Type</span></a></li>
+                        <li><a href="{{ route('fees.assign') }}" class="sidebar-menu-link {{ request()->routeIs('fees.assign', 'fees.assignments.store', 'fees.assignments.update') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Assign Fees</span></a></li>
+                    @endif
+                    <li><a href="{{ route('fees.assignments.index') }}" class="sidebar-menu-link {{ request()->routeIs('fees.assignments.index', 'fees.assignments.show') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>{{ $isExaminationManager ? 'Student Fee List' : 'My Fees' }}</span></a></li>
+                    @if ($isExaminationManager)
+                        <li><a href="{{ route('fees.assignments.index', ['action' => 'payment']) }}" class="sidebar-menu-link {{ request()->routeIs('fees.payments.create', 'fees.payments.store') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Record Payment</span></a></li>
+                    @endif
+                    <li><a href="{{ route('fees.payments.index') }}" class="sidebar-menu-link {{ request()->routeIs('fees.payments.index', 'fees.payments.edit', 'fees.payments.update') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Payment History</span></a></li>
+                    @if ($isExaminationManager)
+                        <li><a href="{{ route('fees.pending') }}" class="sidebar-menu-link {{ request()->routeIs('fees.pending') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Pending Fees</span></a></li>
+                    @endif
+                    <li><a href="{{ route('fees.payments.index') }}" class="sidebar-menu-link {{ request()->routeIs('fees.receipt') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Fee Receipt</span></a></li>
+                </ul>
+            </div>
+            @endif
+
+            <div class="sidebar-menu-group {{ $noticesMenuActive ? 'is-open' : '' }}" data-sidebar-group>
+                <button type="button" class="sidebar-menu-link sidebar-menu-toggle {{ $noticesMenuActive ? 'active' : '' }}"
+                    aria-expanded="{{ $noticesMenuActive ? 'true' : 'false' }}" aria-controls="notice-management-menu"
+                    data-sidebar-toggle>
+                    <i class="bi bi-megaphone-fill"></i>
+                    <span>Notice Management</span>
+                    <i class="bi bi-chevron-down sidebar-menu-arrow" aria-hidden="true"></i>
+                </button>
+                <ul class="sidebar-menu sidebar-submenu" id="notice-management-menu">
+                    @if ($isExaminationManager)
+                        <li><a href="{{ route('notices.index') }}" class="sidebar-menu-link {{ request()->routeIs('notices.index') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Notice List</span></a></li>
+                        <li><a href="{{ route('notices.create') }}" class="sidebar-menu-link {{ request()->routeIs('notices.create') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Add Notice</span></a></li>
+                        <li><a href="{{ route('notices.index', ['manage' => 'edit']) }}" class="sidebar-menu-link {{ request()->routeIs('notices.edit', 'notices.update') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Edit Notice</span></a></li>
+                    @endif
+                    <li><a href="{{ route('notices.published') }}" class="sidebar-menu-link {{ request()->routeIs('notices.published') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Published Notices</span></a></li>
+                    @if (!$isExaminationManager)
+                        <li><a href="{{ route('notices.published') }}" class="sidebar-menu-link {{ request()->routeIs('notices.show') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Notice Details</span></a></li>
+                    @endif
+                </ul>
+            </div>
+
+            <div class="sidebar-menu-group {{ $reportsMenuActive ? 'is-open' : '' }}" data-sidebar-group>
+                <button type="button" class="sidebar-menu-link sidebar-menu-toggle {{ $reportsMenuActive ? 'active' : '' }}"
+                    aria-expanded="{{ $reportsMenuActive ? 'true' : 'false' }}" aria-controls="reports-menu"
+                    data-sidebar-toggle>
+                    <i class="bi bi-file-earmark-bar-graph-fill"></i>
+                    <span>Reports</span>
+                    <i class="bi bi-chevron-down sidebar-menu-arrow" aria-hidden="true"></i>
+                </button>
+                <ul class="sidebar-menu sidebar-submenu" id="reports-menu">
+                    <li><a href="{{ route('reports.students') }}" class="sidebar-menu-link {{ request()->routeIs('reports.students') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Student Report</span></a></li>
+                    @if ($isExaminationManager)
+                        <li><a href="{{ route('reports.teachers') }}" class="sidebar-menu-link {{ request()->routeIs('reports.teachers') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Teacher Report</span></a></li>
+                    @endif
+                    <li><a href="{{ route('reports.attendance') }}" class="sidebar-menu-link {{ request()->routeIs('reports.attendance') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Attendance Report</span></a></li>
+                    <li><a href="{{ route('reports.exams') }}" class="sidebar-menu-link {{ request()->routeIs('reports.exams') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Exam Report</span></a></li>
+                    <li><a href="{{ route('reports.marks') }}" class="sidebar-menu-link {{ request()->routeIs('reports.marks') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Marks Report</span></a></li>
+                    @if ($isExaminationManager || Auth::user()->role === 'student')
+                        <li><a href="{{ route('reports.fees') }}" class="sidebar-menu-link {{ request()->routeIs('reports.fees') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Fee Report</span></a></li>
+                    @endif
+                    @if (Auth::user()->role !== 'student')
+                        <li><a href="{{ route('reports.classes') }}" class="sidebar-menu-link {{ request()->routeIs('reports.classes') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Class Report</span></a></li>
+                    @endif
+                    <li><a href="{{ route('reports.academic_years') }}" class="sidebar-menu-link {{ request()->routeIs('reports.academic_years') ? 'active' : '' }}"><i class="bi bi-circle-fill"></i><span>Academic Year Report</span></a></li>
                 </ul>
             </div>
         </nav>

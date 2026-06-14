@@ -10,4 +10,5 @@
         <i class="bi bi-person-plus-fill me-2"></i>Add User
     </a>
 </div>
+@include('dashboards._notices')
 @endsection

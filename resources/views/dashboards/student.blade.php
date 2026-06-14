@@ -7,4 +7,5 @@
         <p>View your upcoming exams and published examination schedules.</p>
     </div>
 </div>
+@include('dashboards._notices')
 @endsection
