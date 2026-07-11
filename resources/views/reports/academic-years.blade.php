@@ -1,7 +1,0 @@
-@extends('layouts.super_admin', ['pageTitle' => 'Academic Year Report'])
-@section('super_admin_content')
-@include('reports._styles')
-<div class="page-heading"><div><h1>Academic Year Report</h1><p>Year-level enrollment, exams, attendance, fees, and results summary.</p></div>@include('reports._toolbar')</div>
-<div class="card report-card mb-4 report-filters"><div class="card-body"><form class="row g-3">@include('reports._common_filters', ['fields' => ['academic_year','class_id','section_id']])<div class="col-12 d-flex gap-2"><button class="btn btn-academic">Apply Filters</button><a href="{{ route('reports.academic_years') }}" class="btn btn-outline-secondary">Reset</a></div></form></div></div>
-<div class="card report-card"><div class="card-body table-responsive"><table class="table table-hover report-table"><thead><tr><th>Academic Year</th><th>Students</th><th>Classes</th><th>Exams</th><th>Attendance</th><th>Fees Assigned</th><th>Collected</th><th>Balance</th><th>Pass / Fail</th></tr></thead><tbody>@forelse($yearRows as $row)<tr><td class="fw-semibold">{{ $row->year }}</td><td>{{ $row->students }}</td><td>{{ $row->classes }}</td><td>{{ $row->exams }}</td><td>{{ number_format($row->attendance,1) }}%</td><td>{{ number_format($row->fees_assigned,2) }}</td><td>{{ number_format($row->fees_paid,2) }}</td><td>{{ number_format($row->fees_balance,2) }}</td><td>{{ $row->passed }} / {{ $row->failed }}</td></tr>@empty<tr><td colspan="9" class="text-center py-5 text-muted">No academic year data found.</td></tr>@endforelse</tbody></table></div></div>
-@endsection
